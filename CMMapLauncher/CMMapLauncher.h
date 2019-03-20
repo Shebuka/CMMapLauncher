@@ -55,8 +55,8 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
     CMMapAppTomTom,         // TomTom
     CMMapAppSygic,          // Sygic
     CMMapAppHereMaps,       // HERE Maps
-    CMMapAppMoovit          // Moovit
-    
+    CMMapAppMoovit,         // Moovit
+    CMMapAppLast            // Must be always last
 };
 
 @interface CMMapLauncher : NSObject
@@ -76,6 +76,26 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 + (BOOL)isMapAppInstalled:(CMMapApp)mapApp;
 
 /**
+ Shows the action sheet with all available mapping apps as options
+ to where show the desired point.
+ 
+ @param controller A view controller that will present the action sheet.
+ @param position The position of the desired point to show.
+ */
++ (void)showActionSheetWithMapAppOptionsInViewCOntroller:(UIViewController *)controller ForPosition:(CMMapPoint *)position;
+
+/**
+ Launches the specified mapping application with position
+ of the specific specified point.
+ 
+ @param mapApp An enumeration value identifying a mapping application.
+ @param position The position of the desired point to show.
+ 
+ @return YES if the mapping app could be launched, NO otherwise.
+ */
++ (BOOL)launchMapApp:(CMMapApp)mapApp forPosition:(CMMapPoint *)position;
+
+/**
  Launches the specified mapping application with directions
  from the user's current location to the specified endpoint.
 
@@ -85,7 +105,6 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  @return YES if the mapping app could be launched, NO otherwise.
  */
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end;
-
 
 /**
  Launches the specified mapping application with directions

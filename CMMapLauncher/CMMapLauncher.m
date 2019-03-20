@@ -25,6 +25,7 @@
 @interface CMMapLauncher ()
 
 + (NSString *)urlPrefixForMapApp:(CMMapApp)mapApp;
++ (NSString *)nameForMapApp:(CMMapApp)mapApp;
 + (NSString *)urlEncode:(NSString *)queryParam;
 + (NSString *)googleMapsStringForMapPoint:(CMMapPoint *)mapPoint;
 
@@ -95,6 +96,52 @@ static BOOL debugEnabled;
     }
 }
 
++ (NSString *)nameForMapApp:(CMMapApp)mapApp {
+    switch (mapApp) {
+        case CMMapAppAppleMaps:
+            return @"Apple Maps";
+            
+        case CMMapAppCitymapper:
+            return @"Citymapper";
+            
+        case CMMapAppGoogleMaps:
+            return @"Google Maps";
+            
+        case CMMapAppNavigon:
+            return @"Navigon";
+            
+        case CMMapAppTheTransitApp:
+            return @"Transit App";
+            
+        case CMMapAppWaze:
+            return @"Waze";
+            
+        case CMMapAppYandex:
+            return @"Yandex.Navi";
+            
+        case CMMapAppUber:
+            return @"Uber";
+            
+        case CMMapAppTomTom:
+            return @"TomTom GO";
+            
+        case CMMapAppSygic:
+            return @"Sygic GPS";
+            
+        case CMMapAppHereMaps:
+            return @"HERE WeGo";
+            
+        case CMMapAppMoovit:
+            return @"Moovit";
+            
+        default:
+            return nil;
+    }
+}
+
+//case .lyft: return "Lyft"
+//case .dbnavigator: return "DB Navigator"
+
 + (NSString *)urlEncode:(NSString *)queryParam {
     // Encode all the reserved characters, per RFC 3986
     // (<http://www.ietf.org/rfc/rfc3986.txt>)
@@ -147,6 +194,39 @@ static BOOL debugEnabled;
     return [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:urlPrefix]];
 }
 
++ (void)showActionSheetWithMapAppOptionsInViewCOntroller:(UIViewController *)aController ForPosition:(CMMapPoint *)aPosition {
+    
+    // Create new alert controller
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    // Add cancel action
+    UIAlertAction *alertCancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self logDebug:@"CMMapLauncher::showActionSheetWithMapAppOptionsForPosition: Cancel action"];
+    }];
+    [alertController addAction:alertCancelAction];
+    
+    for (NSUInteger x = 0; x < CMMapAppLast; x++) {
+        if ([self isMapAppInstalled:x]) {
+            NSString *mapAppName = [self nameForMapApp:x];
+            
+            UIAlertAction *alertMemberInfoAction = [UIAlertAction actionWithTitle:mapAppName style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                NSString *log = [NSString stringWithFormat:@"CMMapLauncher::showActionSheetWithMapAppOptionsForPosition: %@ action", mapAppName];
+                [self logDebug:log];
+                
+                [self launchMapApp:x forPosition:aPosition];
+            }];
+            [alertController addAction:alertMemberInfoAction];
+        }
+    }
+    
+    // Present the alert controller
+    [aController presentViewController:alertController animated:YES completion:nil];
+}
+
++ (BOOL)launchMapApp:(CMMapApp)mapApp forPosition:(CMMapPoint *)position {
+    return [CMMapLauncher launchMapApp:mapApp forDirectionsFrom:nil to:position directionsMode:@"none"];
+}
+
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end {
     return [CMMapLauncher launchMapApp:mapApp forDirectionsTo:end directionsMode:nil];
 }
@@ -164,37 +244,35 @@ static BOOL debugEnabled;
 }
 
 // Main method
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-   forDirectionsFrom:(CMMapPoint *)start
-                  to:(CMMapPoint *)end
-      directionsMode:(NSString *)directionsMode
-              extras:(NSDictionary*)extras {
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end directionsMode:(NSString *)directionsMode extras:(NSDictionary*)extras {
     if (![CMMapLauncher isMapAppInstalled:mapApp]) {
         return NO;
     }
     
     if (mapApp == CMMapAppAppleMaps) {
-        NSDictionary *launchOptions;
-        if (directionsMode) {
-            if ([directionsMode isEqual:@"walking"]) {
-                directionsMode = MKLaunchOptionsDirectionsModeWalking;
-            }
-            else if ([directionsMode isEqual:@"transit"]) {
-                directionsMode = MKLaunchOptionsDirectionsModeTransit;
-            }
-            else {
-                directionsMode = MKLaunchOptionsDirectionsModeDriving;
-            }
-            launchOptions = @{ MKLaunchOptionsDirectionsModeKey: directionsMode };
+        NSMutableDictionary *launchOptions = [NSMutableDictionary dictionary];
+        
+        if ([directionsMode isEqual:@"none"]) {
+            directionsMode = nil;
+        }
+        else if ([directionsMode isEqual:@"walking"]) {
+            directionsMode = MKLaunchOptionsDirectionsModeWalking;
+        }
+        else if ([directionsMode isEqual:@"transit"]) {
+            directionsMode = MKLaunchOptionsDirectionsModeTransit;
         }
         else {
-            launchOptions = @{ MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving };
+            directionsMode = MKLaunchOptionsDirectionsModeDriving;
         }
+        
+        if (directionsMode)
+            [launchOptions addEntriesFromDictionary:@{ MKLaunchOptionsDirectionsModeKey: directionsMode }];
+        
         if (extras) {
             NSEnumerator *keyEnum = [extras keyEnumerator];
             id key;
             while ((key = [keyEnum nextObject])) {
-                launchOptions = @{ key: [extras objectForKey:key] };
+                [launchOptions addEntriesFromDictionary:@{ key: [extras objectForKey:key] }];
             }
         }
         
@@ -208,7 +286,13 @@ static BOOL debugEnabled;
                         directionsMode,
                         extras]];
         
-        return [MKMapItem openMapsWithItems:@[start.MKMapItem, end.MKMapItem] launchOptions:launchOptions];
+        NSMutableArray *array = [NSMutableArray array];
+        if (start)
+            [array addObject:start.MKMapItem];
+        if (end)
+            [array addObject:end.MKMapItem];
+        
+        return [MKMapItem openMapsWithItems:array launchOptions:launchOptions];
     }
     else if (mapApp == CMMapAppGoogleMaps) {
         NSMutableString *url = [[NSString stringWithFormat:@"%@?saddr=%@&daddr=%@",
