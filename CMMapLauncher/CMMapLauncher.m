@@ -98,7 +98,7 @@ static BOOL debugEnabled;
 + (NSString *)urlEncode:(NSString *)queryParam {
     // Encode all the reserved characters, per RFC 3986
     // (<http://www.ietf.org/rfc/rfc3986.txt>)
-    NSString *newString = (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (__bridge CFStringRef)queryParam, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8);
+    NSString *newString = [queryParam stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     
     if (newString) {
         return newString;
@@ -325,17 +325,17 @@ static BOOL debugEnabled;
                    [self urlPrefixForMapApp:CMMapAppUber],
                    end.coordinate.latitude,
                    end.coordinate.longitude,
-                   [end.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                   [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         }
         else {
             url = [NSMutableString stringWithFormat:@"%@?action=setPickup&pickup[latitude]=%f&pickup[longitude]=%f&pickup[nickname]=%@&dropoff[latitude]=%f&dropoff[longitude]=%f&dropoff[nickname]=%@",
                    [self urlPrefixForMapApp:CMMapAppUber],
                    start.coordinate.latitude,
                    start.coordinate.longitude,
-                   [start.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                   [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
                    end.coordinate.latitude,
                    end.coordinate.longitude,
-                   [end.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                   [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         }
         if (extras) {
             [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
@@ -347,7 +347,7 @@ static BOOL debugEnabled;
         NSMutableString *url = [NSMutableString stringWithFormat:@"tomtomhome:geo:action=navigateto&lat=%f&long=%f&name=%@",
                                 end.coordinate.latitude,
                                 end.coordinate.longitude,
-                                [end.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                                [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         if (extras) {
             [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
         }
@@ -385,7 +385,7 @@ static BOOL debugEnabled;
                           start.coordinate.latitude, start.coordinate.longitude];
             
             if (start.name) {
-                [startParam appendFormat:@",%@", [start.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                [startParam appendFormat:@",%@", [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
             }
         }
         
@@ -393,7 +393,7 @@ static BOOL debugEnabled;
                                       end.coordinate.latitude, end.coordinate.longitude];
         
         if (end.name) {
-            [destParam appendFormat:@",%@", [end.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+            [destParam appendFormat:@",%@", [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         }
         
         NSMutableString *url = [NSMutableString stringWithFormat:@"%@%@/%@",
@@ -415,16 +415,15 @@ static BOOL debugEnabled;
          end.coordinate.latitude, end.coordinate.longitude];
         
         if (end.name) {
-            [url appendFormat:@"&dest_name=%@", [end.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+            [url appendFormat:@"&dest_name=%@", [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         }
         
-        NSMutableString *startParam;
         if (!start.isCurrentLocation) {
             [url appendFormat:@"&orig_lat=%f&orig_lon=%f",
              start.coordinate.latitude, start.coordinate.longitude];
             
             if (start.name) {
-                [url appendFormat:@"&orig_name=%@", [start.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                [url appendFormat:@"&orig_name=%@", [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
             }
         }
         
