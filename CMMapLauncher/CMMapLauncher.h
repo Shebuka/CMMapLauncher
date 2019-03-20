@@ -84,8 +84,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 
  @return YES if the mapping app could be launched, NO otherwise.
  */
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-     forDirectionsTo:(CMMapPoint *)end;
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end;
 
 
 /**
@@ -99,9 +98,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  
  @return YES if the mapping app could be launched, NO otherwise.
  */
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-     forDirectionsTo:(CMMapPoint *)end
-      directionsMode:(NSString *)directionsMode;
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end directionsMode:(NSString *)directionsMode;
 
 /**
  Launches the specified mapping application with directions
@@ -113,9 +110,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 
  @return YES if the mapping app could be launched, NO otherwise.
  */
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-   forDirectionsFrom:(CMMapPoint *)start
-                  to:(CMMapPoint *)end;
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end;
 
 /**
  Launches the specified mapping application with directions
@@ -129,10 +124,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 
  @return YES if the mapping app could be launched, NO otherwise.
  */
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-   forDirectionsFrom:(CMMapPoint *)start
-                  to:(CMMapPoint *)end
-      directionsMode:(NSString *)directionsMode;
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end directionsMode:(NSString *)directionsMode;
 
 /**
  Launches the specified mapping application with directions
@@ -148,11 +140,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 
  @return YES if the mapping app could be launched, NO otherwise.
  */
-+ (BOOL)launchMapApp:(CMMapApp)mapApp
-   forDirectionsFrom:(CMMapPoint *)start
-                  to:(CMMapPoint *)end
-      directionsMode:(NSString *)directionsMode
-      extras:(NSDictionary *)extras;
++ (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end directionsMode:(NSString *)directionsMode extras:(NSDictionary *)extras;
 
 @end
 
@@ -206,8 +194,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  @param name The user-visible name of the new map point.
  @param coordinate The geographical coordinate of the new map point.
  */
-+ (CMMapPoint *)mapPointWithName:(NSString *)name
-                      coordinate:(CLLocationCoordinate2D)coordinate;
++ (CMMapPoint *)mapPointWithName:(NSString *)name coordinate:(CLLocationCoordinate2D)coordinate;
 
 /**
  Creates a new CMMapPoint with the given name, address, and coordinate.
@@ -216,9 +203,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  @param address The address string of the new map point.
  @param coordinate The geographical coordinate of the new map point.
  */
-+ (CMMapPoint *)mapPointWithName:(NSString *)name
-                         address:(NSString *)address
-                      coordinate:(CLLocationCoordinate2D)coordinate;
++ (CMMapPoint *)mapPointWithName:(NSString *)name address:(NSString *)address coordinate:(CLLocationCoordinate2D)coordinate;
 
 /**
  Creates a new CMMapPoint with the given name, address, and coordinate.
@@ -226,13 +211,9 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  @param address The address string of the new map point.
  @param coordinate The geographical coordinate of the new map point.
  */
-+ (CMMapPoint *)mapPointWithAddress:(NSString *)address
-                         coordinate:(CLLocationCoordinate2D)coordinate;
++ (CMMapPoint *)mapPointWithAddress:(NSString *)address coordinate:(CLLocationCoordinate2D)coordinate;
 
 
-+ (CMMapPoint *)mapPointWithMapItem:(MKMapItem *)mapItem
-                               name:(NSString *)name
-                            address:(NSString *)address
-                         coordinate:(CLLocationCoordinate2D)coordinate;
++ (CMMapPoint *)mapPointWithMapItem:(MKMapItem *)mapItem name:(NSString *)name address:(NSString *)address coordinate:(CLLocationCoordinate2D)coordinate;
 
 @end
