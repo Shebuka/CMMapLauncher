@@ -195,9 +195,7 @@ static BOOL debugEnabled;
                 NSString *log = [NSString stringWithFormat:@"CMMapLauncher::showActionSheetWithMapAppOptionsForPosition: %@ action", mapAppName];
                 [self logDebug:log];
                 
-                aPosition.name = @"Bahnhof | Frankfurt % Main & West";
-                
-                [self launchMapApp:x forDirectionsTo:aPosition];
+                [self launchMapApp:x forPosition:aPosition];
             }];
             [alertController addAction:alertMemberInfoAction];
         }
@@ -237,7 +235,6 @@ static BOOL debugEnabled;
         return NO;
     
     NSURLComponents *urlComponents = [NSURLComponents componentsWithString:@""];
-    //urlComponents.host = @"";
     NSMutableArray *queryItems = [NSMutableArray array];
     
     if (mapApp == CMMapAppAppleMaps) {
@@ -332,7 +329,6 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-//        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"citymapper://directions?endcoord=45.455105,9.152707&endname=Manz%20%7C%20West%20%26%20Stati%25n"]];
         return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppTheTransitApp) {
