@@ -59,6 +59,10 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
     CMMapAppLast            // Must be always last
 };
 
+NSString *const CMDirectionsModeDriving = @"driving";
+NSString *const CMDirectionsModeWalking = @"walking";
+NSString *const CMDirectionsModeTransit = @"transit";
+
 @interface CMMapLauncher : NSObject
 
 /**
@@ -82,7 +86,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
  @param controller A view controller that will present the action sheet.
  @param position The position of the desired point to show.
  */
-+ (void)showActionSheetWithMapAppOptionsInViewCOntroller:(UIViewController *)controller ForPosition:(CMMapPoint *)position;
++ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)controller forPosition:(CMMapPoint *)position;
 
 /**
  Launches the specified mapping application with position
@@ -234,5 +238,12 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
 
 
 + (CMMapPoint *)mapPointWithMapItem:(MKMapItem *)mapItem name:(NSString *)name address:(NSString *)address coordinate:(CLLocationCoordinate2D)coordinate;
+
+/**
+ Creates a new NSString from coordinates
+ 
+ @return String in format longitude,latitude
+ */
+- (NSString *)coordinateString;
 
 @end

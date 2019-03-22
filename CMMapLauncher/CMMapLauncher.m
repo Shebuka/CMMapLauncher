@@ -27,7 +27,6 @@
 + (NSString *)urlPrefixForMapApp:(CMMapApp)mapApp;
 + (NSString *)nameForMapApp:(CMMapApp)mapApp;
 + (NSString *)urlEncode:(NSString *)queryParam;
-+ (NSString *)googleMapsStringForMapPoint:(CMMapPoint *)mapPoint;
 
 @end
 
@@ -38,7 +37,11 @@ static BOOL debugEnabled;
 @implementation CMMapLauncher
 
 + (void)initialize {
+#ifdef DEBUG
+    debugEnabled = TRUE;
+#else
     debugEnabled = FALSE;
+#endif
 }
 
 + (void)enableDebugLogging {
@@ -59,37 +62,37 @@ static BOOL debugEnabled;
 + (NSString *)urlPrefixForMapApp:(CMMapApp)mapApp {
     switch (mapApp) {
         case CMMapAppCitymapper:
-            return @"citymapper://";
+            return @"citymapper";
             
         case CMMapAppGoogleMaps:
-            return @"comgooglemaps://";
+            return @"comgooglemaps";
             
         case CMMapAppNavigon:
-            return @"navigon://";
+            return @"navigon";
             
         case CMMapAppTheTransitApp:
-            return @"transit://";
+            return @"transit";
             
         case CMMapAppWaze:
-            return @"waze://";
+            return @"waze";
             
         case CMMapAppYandex:
-            return @"yandexnavi://";
+            return @"yandexnavi";
             
         case CMMapAppUber:
-            return @"uber://";
+            return @"uber";
             
         case CMMapAppTomTom:
-            return @"tomtomhome://";
+            return @"tomtomhome";
             
         case CMMapAppSygic:
-            return @"com.sygic.aura://";
+            return @"com.sygic.aura";
             
         case CMMapAppHereMaps:
-            return @"here-route://";
+            return @"here-route";
             
         case CMMapAppMoovit:
-            return @"moovit://";
+            return @"moovit";
             
         default:
             return nil;
@@ -99,40 +102,40 @@ static BOOL debugEnabled;
 + (NSString *)nameForMapApp:(CMMapApp)mapApp {
     switch (mapApp) {
         case CMMapAppAppleMaps:
-            return @"Apple Maps";
+            return @"Apple Maps";   //ok
             
         case CMMapAppCitymapper:
-            return @"Citymapper";
+            return @"Citymapper";   //ok
             
         case CMMapAppGoogleMaps:
-            return @"Google Maps";
+            return @"Google Maps";  //ok
             
         case CMMapAppNavigon:
-            return @"Navigon";
+            return @"Navigon";      //?
             
         case CMMapAppTheTransitApp:
-            return @"Transit App";
+            return @"Transit";      //ok
             
         case CMMapAppWaze:
-            return @"Waze";
+            return @"Waze";         //ok
             
         case CMMapAppYandex:
-            return @"Yandex.Navi";
+            return @"Yandex.Navi";  //ok
             
         case CMMapAppUber:
-            return @"Uber";
+            return @"Uber";         //ok
             
         case CMMapAppTomTom:
-            return @"TomTom GO";
+            return @"TomTom GO";    //ok ?
             
         case CMMapAppSygic:
-            return @"Sygic GPS";
+            return @"Sygic GPS";    //ok
             
         case CMMapAppHereMaps:
-            return @"HERE WeGo";
+            return @"HERE WeGo";    //ok
             
         case CMMapAppMoovit:
-            return @"Moovit";
+            return @"Moovit";       //ok
             
         default:
             return nil;
@@ -165,42 +168,27 @@ static BOOL debugEnabled;
     return queryParams;
 }
 
-+ (NSString *)googleMapsStringForMapPoint:(CMMapPoint *)mapPoint {
-    if (!mapPoint) {
-        return @"";
-    }
-    
-    if (mapPoint.isCurrentLocation && mapPoint.coordinate.latitude == 0.0 && mapPoint.coordinate.longitude == 0.0) {
-        return @"";
-    }
-    
-    if (mapPoint.name) {
-        return [NSString stringWithFormat:@"%f,%f", mapPoint.coordinate.latitude, mapPoint.coordinate.longitude];
-    }
-    
-    return [NSString stringWithFormat:@"%f,%f", mapPoint.coordinate.latitude, mapPoint.coordinate.longitude];
-}
-
 + (BOOL)isMapAppInstalled:(CMMapApp)mapApp {
     if (mapApp == CMMapAppAppleMaps) {
         return YES;
     }
     
-    NSString *urlPrefix = [CMMapLauncher urlPrefixForMapApp:mapApp];
-    if (!urlPrefix) {
+    NSURLComponents *components = [[NSURLComponents alloc] init];
+    components.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
+    if (!components.URL) {
         return NO;
     }
     
-    return [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:urlPrefix]];
+    return [[UIApplication sharedApplication] canOpenURL:components.URL];
 }
 
-+ (void)showActionSheetWithMapAppOptionsInViewCOntroller:(UIViewController *)aController ForPosition:(CMMapPoint *)aPosition {
++ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)aController forPosition:(CMMapPoint *)aPosition {
     
     // Create new alert controller
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
     // Add cancel action
-    UIAlertAction *alertCancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *alertCancelAction = [UIAlertAction actionWithTitle:@"✕" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [self logDebug:@"CMMapLauncher::showActionSheetWithMapAppOptionsForPosition: Cancel action"];
     }];
     [alertController addAction:alertCancelAction];
@@ -224,11 +212,11 @@ static BOOL debugEnabled;
 }
 
 + (BOOL)launchMapApp:(CMMapApp)mapApp forPosition:(CMMapPoint *)position {
-    return [CMMapLauncher launchMapApp:mapApp forDirectionsFrom:nil to:position directionsMode:@"none"];
+    return [CMMapLauncher launchMapApp:mapApp forDirectionsFrom:nil to:position directionsMode:nil];
 }
 
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end {
-    return [CMMapLauncher launchMapApp:mapApp forDirectionsTo:end directionsMode:nil];
+    return [CMMapLauncher launchMapApp:mapApp forDirectionsTo:end directionsMode:CMDirectionsModeDriving];
 }
 
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsTo:(CMMapPoint *)end directionsMode:(NSString *)directionsMode {
@@ -236,7 +224,7 @@ static BOOL debugEnabled;
 }
 
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end {
-    return [CMMapLauncher launchMapApp:mapApp forDirectionsFrom:start to:end directionsMode:nil];
+    return [CMMapLauncher launchMapApp:mapApp forDirectionsFrom:start to:end directionsMode:CMDirectionsModeDriving];
 }
 
 + (BOOL)launchMapApp:(CMMapApp)mapApp forDirectionsFrom:(CMMapPoint *)start to:(CMMapPoint *)end directionsMode:(NSString *)directionsMode {
@@ -249,42 +237,36 @@ static BOOL debugEnabled;
         return NO;
     }
     
+    if (end == nil)
+        return NO;
+    
+    NSURLComponents *urlComponents = [NSURLComponents componentsWithString:@""];
+    //urlComponents.host = @"";
+    NSMutableArray *queryItems = [NSMutableArray array];
+    
     if (mapApp == CMMapAppAppleMaps) {
         NSMutableDictionary *launchOptions = [NSMutableDictionary dictionary];
         
-        if ([directionsMode isEqual:@"none"]) {
-            directionsMode = nil;
+        if ([directionsMode isEqual:CMDirectionsModeDriving]) {
+            directionsMode = MKLaunchOptionsDirectionsModeDriving;
         }
-        else if ([directionsMode isEqual:@"walking"]) {
+        else if ([directionsMode isEqual:CMDirectionsModeWalking]) {
             directionsMode = MKLaunchOptionsDirectionsModeWalking;
         }
-        else if ([directionsMode isEqual:@"transit"]) {
+        else if ([directionsMode isEqual:CMDirectionsModeTransit]) {
             directionsMode = MKLaunchOptionsDirectionsModeTransit;
-        }
-        else {
-            directionsMode = MKLaunchOptionsDirectionsModeDriving;
         }
         
         if (directionsMode)
             [launchOptions addEntriesFromDictionary:@{ MKLaunchOptionsDirectionsModeKey: directionsMode }];
         
-        if (extras) {
-            NSEnumerator *keyEnum = [extras keyEnumerator];
-            id key;
-            while ((key = [keyEnum nextObject])) {
-                [launchOptions addEntriesFromDictionary:@{ key: [extras objectForKey:key] }];
-            }
+        for (id key in extras) {
+            id value = extras[key];
+            [launchOptions addEntriesFromDictionary:@{ key: value }];
         }
         
         [self logDebug:[NSString stringWithFormat:@"Launching Apple Maps: destAddress=%@; destLatLon=%f,%f; destName=%@; startAddress=%@; startLatLon=%f,%f; startName=%@; directionsMode=%@; extras=%@",
-                        end.address,
-                        end.coordinate.latitude, end.coordinate.longitude,
-                        end.name,
-                        start.address,
-                        start.coordinate.latitude, start.coordinate.longitude,
-                        start.name,
-                        directionsMode,
-                        extras]];
+                        end.address, end.coordinate.latitude, end.coordinate.longitude, end.name, start.address, start.coordinate.latitude, start.coordinate.longitude, start.name, directionsMode, extras]];
         
         NSMutableArray *array = [NSMutableArray array];
         if (start)
@@ -295,140 +277,211 @@ static BOOL debugEnabled;
         return [MKMapItem openMapsWithItems:array launchOptions:launchOptions];
     }
     else if (mapApp == CMMapAppGoogleMaps) {
-        NSMutableString *url = [[NSString stringWithFormat:@"%@?saddr=%@&daddr=%@",
-                                 [self urlPrefixForMapApp:CMMapAppGoogleMaps],
-                                 [CMMapLauncher googleMapsStringForMapPoint:start],
-                                 [CMMapLauncher googleMapsStringForMapPoint:end]
-                                 ] mutableCopy];
-        if (directionsMode) {
-            [url appendFormat:@"&directionsmode=%@", directionsMode];
+        // https://developers.google.com/maps/documentation/urls/ios-urlscheme#search
+        
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.host = @"maps";
+        
+        if (directionsMode == nil || start == nil) {
+            if (end.name)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"q" value:end.name] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"center" value:[end coordinateString]] ];
+        }
+        else {
+            if (!start.isCurrentLocation)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"saddr" value:[start coordinateString]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"daddr" value:[end coordinateString]] ];
+            if (directionsMode)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"directionsmode" value:directionsMode] ];
         }
         
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
+        // extras can be: zoom=<zoom_level>
+        for (NSString *key in extras) {
+            NSString *value = extras[key];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
         }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppCitymapper) {
-        NSMutableArray *params = [NSMutableArray arrayWithCapacity:10];
+        // https://citymapper.com/tools/1053/launch-citymapper-for-directions
+        
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.host = @"directions";
+        
         if (start && !start.isCurrentLocation) {
-            [params addObject:[NSString stringWithFormat:@"startcoord=%f,%f", start.coordinate.latitude, start.coordinate.longitude]];
-            if (start.name) {
-                [params addObject:[NSString stringWithFormat:@"startname=%@", [CMMapLauncher urlEncode:start.name]]];
-            }
-            if (start.address) {
-                [params addObject:[NSString stringWithFormat:@"startaddress=%@", [CMMapLauncher urlEncode:start.address]]];
-            }
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"startcoord" value:[start coordinateString]] ];
+            if (start.name)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"startname" value:start.name] ];
+            if (start.address)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"startaddress" value:start.address] ];
         }
-        if (end && !end.isCurrentLocation) {
-            [params addObject:[NSString stringWithFormat:@"endcoord=%f,%f", end.coordinate.latitude, end.coordinate.longitude]];
-            if (end.name) {
-                [params addObject:[NSString stringWithFormat:@"endname=%@", [CMMapLauncher urlEncode:end.name]]];
-            }
-            if (end.address) {
-                [params addObject:[NSString stringWithFormat:@"endaddress=%@", [CMMapLauncher urlEncode:end.address]]];
-            }
+        if (!end.isCurrentLocation) {
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"endcoord" value:[end coordinateString]] ];
+            if (end.name)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"endname" value:end.name] ];
+            if (end.address)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"endaddress" value:end.address] ];
         }
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@directions?%@",
-                                [self urlPrefixForMapApp:CMMapAppCitymapper],
-                                [params componentsJoinedByString:@"&"]];
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
+        
+        // extras can be: arriveby=<ISO-8601 (yyyy-MM-ddTHH:mm:ssZ)>
+        for (NSString *key in extras) {
+            NSString *value = extras[key];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
         }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+//        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"citymapper://directions?endcoord=45.455105,9.152707&endname=Manz%20%7C%20West%20%26%20Stati%25n"]];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppTheTransitApp) {
         // http://thetransitapp.com/developers
         
-        NSMutableArray *params = [NSMutableArray arrayWithCapacity:2];
-        if (start && !start.isCurrentLocation) {
-            [params addObject:[NSString stringWithFormat:@"from=%f,%f", start.coordinate.latitude, start.coordinate.longitude]];
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        
+        if (directionsMode == nil || start == nil) {
+            urlComponents.host = @"routes";
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"q" value:[end coordinateString]] ];
         }
-        if (end && !end.isCurrentLocation) {
-            [params addObject:[NSString stringWithFormat:@"to=%f,%f", end.coordinate.latitude, end.coordinate.longitude]];
+        else {
+            urlComponents.host = @"directions";
+            if (!start.isCurrentLocation)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"from" value:[start coordinateString]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"to" value:[end coordinateString]] ];
         }
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@directions?%@",
-                                [self urlPrefixForMapApp:CMMapAppTheTransitApp],
-                                [params componentsJoinedByString:@"&"]];
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        // extras can be: none
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppNavigon) {
         // http://www.navigon.com/portal/common/faq/files/NAVIGON_AppInteract.pdf
         
-        NSString *name = @"Destination";        // Doc doesn't say whether name can be omitted
-        if (end.name) {
-            name = end.name;
-        }
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@coordinate/%@/%f/%f",
-                                [self urlPrefixForMapApp:CMMapAppNavigon],
-                                [CMMapLauncher urlEncode:name], end.coordinate.longitude, end.coordinate.latitude];
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.host = @"coordinate";
+        
+        if (end.name == nil)
+            end.name = end.coordinateString;
+        
+        NSString *destination = @"/";
+        destination = [destination stringByAppendingString:end.name];
+        destination = [destination stringByAppendingPathComponent:end.coordinateString];
+        
+        urlComponents.path = destination;
+        
+        // extras can be: none
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppWaze) {
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@?ll=%f,%f&navigate=yes",
-                                [self urlPrefixForMapApp:CMMapAppWaze],
-                                end.coordinate.latitude, end.coordinate.longitude];
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
+        // https://developers.google.com/waze/deeplinks/#urls
+        
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.host = @"";
+        
+//        if (end.name)
+//            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"q" value:end.name] ];
+        
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:@"ll" value:[end coordinateString]] ];
+        
+        if (directionsMode)
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"navigate" value:@"yes"] ];
+        
+        // extras can be: z=magnification_level
+        for (NSString *key in extras) {
+            NSString *value = extras[key];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
         }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppYandex) {
-        NSMutableString *url = nil;
-        if (start.isCurrentLocation) {
-            url = [NSMutableString stringWithFormat:@"%@build_route_on_map?lat_to=%f&lon_to=%f",
-                   [self urlPrefixForMapApp:CMMapAppYandex],
-                   end.coordinate.latitude, end.coordinate.longitude];
+        // https://tech.yandex.ru/yandex-apps-launch/navigator/doc/concepts/navigator-url-params-docpage/
+        
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        
+        if (directionsMode == nil || start == nil) {
+            urlComponents.host = @"show_point_on_map";
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lat" value:[@(end.coordinate.latitude) stringValue]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lon" value:[@(end.coordinate.longitude) stringValue]] ];
+            if (end.name)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"desc" value:end.name] ];
+            
+            // extras can be: zoom=<int>, no-balloon=<int>
+            for (NSString *key in extras) {
+                NSString *value = extras[key];
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
+            }
         }
         else {
-            url = [NSMutableString stringWithFormat:@"%@build_route_on_map?lat_to=%f&lon_to=%f&lat_from=%f&lon_from=%f",
-                   [self urlPrefixForMapApp:CMMapAppYandex],
-                   end.coordinate.latitude, end.coordinate.longitude, start.coordinate.latitude, start.coordinate.longitude];
+            urlComponents.host = @"build_route_on_map";
+            if (start && !start.isCurrentLocation) {
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lat_from" value:[@(start.coordinate.latitude) stringValue]] ];
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lon_from" value:[@(start.coordinate.longitude) stringValue]] ];
+            }
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lat_to" value:[@(end.coordinate.latitude) stringValue]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lon_to" value:[@(end.coordinate.longitude) stringValue]] ];
+            
+            // extras can be: none
         }
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppUber) {
-        NSMutableString *url = nil;
-        if (start.isCurrentLocation) {
-            url = [NSMutableString stringWithFormat:@"%@?action=setPickup&pickup=my_location&dropoff[latitude]=%f&dropoff[longitude]=%f&dropoff[nickname]=%@",
-                   [self urlPrefixForMapApp:CMMapAppUber],
-                   end.coordinate.latitude,
-                   end.coordinate.longitude,
-                   [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+        // https://developer.uber.com/docs/riders/ride-requests/tutorials/deep-links/introduction
+        
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        //urlComponents.host = @"uber";
+
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:@"action" value:@"setPickup"] ];
+        
+        if (start == nil || start.isCurrentLocation) {
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"pickup" value:@"my_location"] ];
         }
         else {
-            url = [NSMutableString stringWithFormat:@"%@?action=setPickup&pickup[latitude]=%f&pickup[longitude]=%f&pickup[nickname]=%@&dropoff[latitude]=%f&dropoff[longitude]=%f&dropoff[nickname]=%@",
-                   [self urlPrefixForMapApp:CMMapAppUber],
-                   start.coordinate.latitude,
-                   start.coordinate.longitude,
-                   [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
-                   end.coordinate.latitude,
-                   end.coordinate.longitude,
-                   [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"pickup[latitude]" value:[@(start.coordinate.latitude) stringValue]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"pickup[longitude]" value:[@(start.coordinate.longitude) stringValue]] ];
+            if (start.name == nil)
+                start.name = @"PickUp";
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"pickup[nickname]" value:start.name] ];
         }
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dropoff[latitude]" value:[@(end.coordinate.latitude) stringValue]] ];
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dropoff[longitude]" value:[@(end.coordinate.longitude) stringValue]] ];
+        if (end.name == nil)
+            end.name = @"DropOff";
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dropoff[nickname]" value:end.name] ];
+        
+        // extras can be: client_id=<client_id>, pickup[formatted_address]=<formatted_address>, dropoff[formatted_address]=<formatted_address>, product_id=<product_id>, link_text=<link_text>, partner_deeplink=<partner_deeplink>
+        for (NSString *key in extras) {
+            NSString *value = extras[key];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
         }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppTomTom) {
-        NSMutableString *url = [NSMutableString stringWithFormat:@"tomtomhome:geo:action=navigateto&lat=%f&long=%f&name=%@",
+        // No public documentation
+        
+        NSMutableString *url = [NSMutableString stringWithFormat:@"tomtomhome:geo:action=%@&lat=%f&long=%f&name=%@",
+                                (directionsMode ? @"navigateto" : @"show"),
                                 end.coordinate.latitude,
                                 end.coordinate.longitude,
                                 [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
@@ -439,83 +492,113 @@ static BOOL debugEnabled;
         return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
     }
     else if (mapApp == CMMapAppSygic) {
+        // https://www.sygic.com/developers/professional-navigation-sdk/ios/custom-url/
         
-        if ([directionsMode isEqual:@"walking"]) {
-            directionsMode = @"walk";
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.host = @"";
+        
+        NSMutableArray *query = [NSMutableArray array];
+        
+        if (directionsMode != nil && directionsMode == CMDirectionsModeWalking && end.name)
+            [query addObject:@"coordinateaddr"];
+        else
+            [query addObject:@"coordinate"];
+        
+        [query addObject:[@(end.coordinate.longitude) stringValue]];
+        [query addObject:[@(end.coordinate.latitude) stringValue]];
+        
+        if (directionsMode != nil && directionsMode == CMDirectionsModeWalking && end.name)
+            [query addObject:end.name];
+        
+        if (directionsMode == nil) {
+            [query addObject:@"show"];
+        }
+        else if (directionsMode == CMDirectionsModeWalking) {
+            [query addObject:@"walk"];
         }
         else {
-            directionsMode = @"drive";
+            [query addObject:@"drive"];
         }
-        NSString *separator = @"%7C";
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@coordinate%@%f%@%f%@%@",
-                                [self urlPrefixForMapApp:CMMapAppSygic],
-                                separator,
-                                end.coordinate.longitude,
-                                separator,
-                                end.coordinate.latitude,
-                                separator,
-                                directionsMode];
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        
+        urlComponents.host = [query componentsJoinedByString:@"|"];
+        
+        // extras can be: none
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppHereMaps) {
+        // https://developer.here.com/documentation/mobility-on-demand-toolkit/topics/navigation.html
         
-        NSMutableString *startParam;
-        if (start.isCurrentLocation) {
-            startParam = (NSMutableString *) @"mylocation";
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        
+        urlComponents.host = @"mylocation";
+        
+        NSString *destination = @"/";
+        destination = [destination stringByAppendingString:[end coordinateString]];
+        if (end.name)
+            destination = [destination stringByAppendingFormat:@",%@", [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+        
+        urlComponents.path = destination;
+        
+        if (directionsMode != nil) {
+            if (directionsMode == CMDirectionsModeWalking)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"m" value:@"w"] ];
+            else
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"m" value:@"d"] ];
         }
-        else {
-            startParam = [NSMutableString stringWithFormat:@"%f,%f",
-                          start.coordinate.latitude, start.coordinate.longitude];
-            
-            if (start.name) {
-                [startParam appendFormat:@",%@", [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-            }
+        
+        // extras can be: ref=<Referrer>
+        for (NSString *key in extras) {
+            NSString *value = extras[key];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
         }
         
-        NSMutableString *destParam = [NSMutableString stringWithFormat:@"%f,%f",
-                                      end.coordinate.latitude, end.coordinate.longitude];
+        urlComponents.queryItems = queryItems;
         
-        if (end.name) {
-            [destParam appendFormat:@",%@", [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-        }
-        
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@%@/%@",
-                                [self urlPrefixForMapApp:CMMapAppHereMaps],
-                                startParam,
-                                destParam];
-        
-        if (extras) {
-            [url appendFormat:@"?%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppMoovit) {
+        // https://www.developers.moovit.com/deeplinking-your-app
         
-        NSMutableString *url = [NSMutableString stringWithFormat:@"%@directions", [self urlPrefixForMapApp:CMMapAppMoovit]];
+        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
         
-        [url appendFormat:@"?dest_lat=%f&dest_lon=%f",
-         end.coordinate.latitude, end.coordinate.longitude];
-        
-        if (end.name) {
-            [url appendFormat:@"&dest_name=%@", [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-        }
-        
-        if (!start.isCurrentLocation) {
-            [url appendFormat:@"&orig_lat=%f&orig_lon=%f",
-             start.coordinate.latitude, start.coordinate.longitude];
+        if (directionsMode == nil) {
+            urlComponents.host = @"nearby";
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lat" value:[@(end.coordinate.latitude) stringValue]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"lon" value:[@(end.coordinate.longitude) stringValue]] ];
             
-            if (start.name) {
-                [url appendFormat:@"&orig_name=%@", [start.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+            // extras can be: partner_id=<YOUR_APP_NAME>
+            for (NSString *key in extras) {
+                NSString *value = extras[key];
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
+            }
+        }
+        else {
+            urlComponents.host = @"directions";
+            if (start && !start.isCurrentLocation) {
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"orig_lat" value:[@(start.coordinate.latitude) stringValue]] ];
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"orig_lon" value:[@(start.coordinate.longitude) stringValue]] ];
+                if (start.name)
+                    [queryItems addObject:[NSURLQueryItem queryItemWithName:@"orig_name" value:start.name] ];
+            }
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dest_lat" value:[@(end.coordinate.latitude) stringValue]] ];
+            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dest_lon" value:[@(end.coordinate.longitude) stringValue]] ];
+            if (end.name)
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:@"dest_name" value:end.name] ];
+            
+            // extras can be: auto_run=<true|false>, date=<ISO-8601 (yyyy-MM-ddTHH:mm:ssZ)>, partner_id=<YOUR_APP_NAME>
+            for (NSString *key in extras) {
+                NSString *value = extras[key];
+                [queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value] ];
             }
         }
         
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        urlComponents.queryItems = queryItems;
+        
+        [self logDebugURI:urlComponents.string];
+        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
     }
     return NO;
 }
@@ -590,6 +673,11 @@ static BOOL debugEnabled;
     mapPoint.address = address;
     mapPoint.coordinate = coordinate;
     return mapPoint;
+}
+
+- (NSString *)coordinateString {
+//    return [NSString stringWithFormat:@"%f,%f", self.coordinate.latitude, self.coordinate.longitude];
+    return [NSString stringWithFormat:@"%@,%@", [@(self.coordinate.latitude) stringValue], [@(self.coordinate.longitude) stringValue]];
 }
 
 @end
