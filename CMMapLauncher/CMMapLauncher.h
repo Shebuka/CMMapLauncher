@@ -55,6 +55,7 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
     CMMapAppSygic,          // Sygic
     CMMapAppHereMaps,       // HERE Maps
     CMMapAppMoovit,         // Moovit
+    
     CMMapAppLast            // Must be always last
 };
 
