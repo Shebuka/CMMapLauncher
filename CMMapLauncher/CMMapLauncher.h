@@ -52,7 +52,6 @@ typedef NS_ENUM(NSUInteger, CMMapApp) {
     CMMapAppWaze,           // Waze
     CMMapAppYandex,         // Yandex Navigator
     CMMapAppUber,           // Uber
-    CMMapAppTomTom,         // TomTom
     CMMapAppSygic,          // Sygic
     CMMapAppHereMaps,       // HERE Maps
     CMMapAppMoovit,         // Moovit

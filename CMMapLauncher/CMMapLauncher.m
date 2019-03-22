@@ -82,9 +82,6 @@ static BOOL debugEnabled;
         case CMMapAppUber:
             return @"uber";
             
-        case CMMapAppTomTom:
-            return @"tomtomhome";
-            
         case CMMapAppSygic:
             return @"com.sygic.aura";
             
@@ -124,9 +121,6 @@ static BOOL debugEnabled;
             
         case CMMapAppUber:
             return @"Uber";         //ok
-            
-        case CMMapAppTomTom:
-            return @"TomTom GO";    //ok ?
             
         case CMMapAppSygic:
             return @"Sygic GPS";    //ok
@@ -201,7 +195,9 @@ static BOOL debugEnabled;
                 NSString *log = [NSString stringWithFormat:@"CMMapLauncher::showActionSheetWithMapAppOptionsForPosition: %@ action", mapAppName];
                 [self logDebug:log];
                 
-                [self launchMapApp:x forPosition:aPosition];
+                aPosition.name = @"Bahnhof | Frankfurt % Main & West";
+                
+                [self launchMapApp:x forDirectionsTo:aPosition];
             }];
             [alertController addAction:alertMemberInfoAction];
         }
@@ -476,20 +472,6 @@ static BOOL debugEnabled;
         
         [self logDebugURI:urlComponents.string];
         return [[UIApplication sharedApplication] openURL:urlComponents.URL];
-    }
-    else if (mapApp == CMMapAppTomTom) {
-        // No public documentation
-        
-        NSMutableString *url = [NSMutableString stringWithFormat:@"tomtomhome:geo:action=%@&lat=%f&long=%f&name=%@",
-                                (directionsMode ? @"navigateto" : @"show"),
-                                end.coordinate.latitude,
-                                end.coordinate.longitude,
-                                [end.name stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-        if (extras) {
-            [url appendFormat:@"%@", [self extrasToQueryParams:extras]];
-        }
-        [self logDebugURI:url];
-        return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
     }
     else if (mapApp == CMMapAppSygic) {
         // https://www.sygic.com/developers/professional-navigation-sdk/ios/custom-url/
