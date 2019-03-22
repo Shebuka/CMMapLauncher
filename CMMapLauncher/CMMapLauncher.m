@@ -27,6 +27,7 @@
 + (NSString *)urlPrefixForMapApp:(CMMapApp)mapApp;
 + (NSString *)nameForMapApp:(CMMapApp)mapApp;
 + (NSString *)urlEncode:(NSString *)queryParam;
++ (BOOL)openMapURL:(NSURL *)url;
 
 @end
 
@@ -151,6 +152,23 @@ static BOOL debugEnabled;
     return @"";
 }
 
++ (BOOL)openMapURL:(NSURL *)url {
+    UIApplication *application = [UIApplication sharedApplication];
+    
+    if (@available(iOS 10.0, *)) {
+        [application openURL:url options:@{}
+           completionHandler:^(BOOL success) {
+               [self logDebug:[NSString stringWithFormat:@"CMMapLauncher::openMapUrl: %@: %d", url, success]];
+           }];
+        return YES;
+    }
+    else {
+        BOOL success = [application openURL:url];
+        [self logDebug:[NSString stringWithFormat:@"CMMapLauncher::openMapUrl: %@: %d", url, success]];
+        return success;
+    }
+}
+
 + (NSString *)extrasToQueryParams:(NSDictionary *)extras {
     NSString *queryParams = @"";
     NSEnumerator *keyEnum = [extras keyEnumerator];
@@ -272,7 +290,7 @@ static BOOL debugEnabled;
     else if (mapApp == CMMapAppGoogleMaps) {
         // https://developers.google.com/maps/documentation/urls/ios-urlscheme#search
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         urlComponents.host = @"maps";
         
         if (directionsMode == nil || start == nil) {
@@ -297,12 +315,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppCitymapper) {
         // https://citymapper.com/tools/1053/launch-citymapper-for-directions
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         urlComponents.host = @"directions";
         
         if (start && !start.isCurrentLocation) {
@@ -329,12 +347,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppTheTransitApp) {
         // http://thetransitapp.com/developers
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         
         if (directionsMode == nil || start == nil) {
             urlComponents.host = @"routes";
@@ -352,12 +370,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppNavigon) {
         // http://www.navigon.com/portal/common/faq/files/NAVIGON_AppInteract.pdf
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         urlComponents.host = @"coordinate";
         
         if (end.name == nil)
@@ -372,12 +390,12 @@ static BOOL debugEnabled;
         // extras can be: none
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppWaze) {
         // https://developers.google.com/waze/deeplinks/#urls
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         urlComponents.host = @"";
         
         [queryItems addObject:[NSURLQueryItem queryItemWithName:@"ll" value:[end coordinateString]] ];
@@ -394,12 +412,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppYandex) {
         // https://tech.yandex.ru/yandex-apps-launch/navigator/doc/concepts/navigator-url-params-docpage/
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         
         if (directionsMode == nil || start == nil) {
             urlComponents.host = @"show_point_on_map";
@@ -429,12 +447,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppUber) {
         // https://developer.uber.com/docs/riders/ride-requests/tutorials/deep-links/introduction
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         //urlComponents.host = @"uber";
 
         [queryItems addObject:[NSURLQueryItem queryItemWithName:@"action" value:@"setPickup"] ];
@@ -464,12 +482,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppSygic) {
         // https://www.sygic.com/developers/professional-navigation-sdk/ios/custom-url/
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         urlComponents.host = @"";
         
         NSMutableArray *query = [NSMutableArray array];
@@ -500,12 +518,12 @@ static BOOL debugEnabled;
         // extras can be: none
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppHereMaps) {
         // https://developer.here.com/documentation/mobility-on-demand-toolkit/topics/navigation.html
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         
         urlComponents.host = @"mylocation";
         
@@ -532,12 +550,12 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     else if (mapApp == CMMapAppMoovit) {
         // https://www.developers.moovit.com/deeplinking-your-app
         
-        urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
+        urlComponents.scheme = [CMMapLauncher urlPrefixForMapApp:mapApp];
         
         if (directionsMode == nil) {
             urlComponents.host = @"nearby";
@@ -573,7 +591,7 @@ static BOOL debugEnabled;
         urlComponents.queryItems = queryItems;
         
         [self logDebugURI:urlComponents.string];
-        return [[UIApplication sharedApplication] openURL:urlComponents.URL];
+        return [CMMapLauncher openMapURL:urlComponents.URL];
     }
     return NO;
 }
