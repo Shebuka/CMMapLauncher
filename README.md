@@ -32,6 +32,8 @@ Since iOS 9 to query schemes of installed apps you need to add these entries int
 
 ## Usage
 
+While the source *from/start* `CMMapPoint` is optional and is used only in **directions mode**, the destination *to/end* `CMMapPoint` is always required in both **show point** and **directions modes**.
+
 To check whether one of the supported mapping apps is present on the user's device:
 
 ```objective-c
@@ -43,9 +45,15 @@ Then, to launch into directions in that app:
 ```objective-c
 CLLocationCoordinate2D bigBen = CLLocationCoordinate2DMake(51.500755, -0.124626);
 
-[CMMapLauncher launchMapApp:CMMapAppCitymapper
-            forDirectionsTo:[CMMapPoint mapPointWithName:@"Big Ben"
-                                              coordinate:bigBen]];
+CMMapPoint *mapPoint = [CMMapPoint mapPointWithName:@"Big Ben" coordinate:bigBen];
+
+[CMMapLauncher launchMapApp:CMMapAppCitymapper forDirectionsTo:mapPoint];
+```
+
+Instead of checking all the available apps yourself, you can present an actionSheet with all currently available apps by calling:
+
+```objective-c
+[CMMapLauncher showActionSheetWithMapAppOptionsInViewController:self forPosition:mapPoint];
 ```
 
 Enable debug logging to log the launch URI/parameters:
