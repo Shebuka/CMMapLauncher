@@ -45,16 +45,19 @@
 // that this launcher knows how to support.
 typedef NS_ENUM(NSUInteger, CMMapApp) {
     CMMapAppAppleMaps = 0,  // Preinstalled Apple Maps
-    CMMapAppCitymapper,     // Citymapper
+    // Navigation apps (by ranking)
     CMMapAppGoogleMaps,     // Standalone Google Maps App
-    CMMapAppNavigon,        // Navigon
-    CMMapAppTheTransitApp,  // The Transit App
     CMMapAppWaze,           // Waze
-    CMMapAppYandex,         // Yandex Navigator
-    CMMapAppUber,           // Uber
-    CMMapAppSygic,          // Sygic
     CMMapAppHereMaps,       // HERE Maps
+    CMMapAppSygic,          // Sygic
+    CMMapAppYandex,         // Yandex Navigator
+    CMMapAppNavigon,        // Navigon
+    // Taxi apps (by ranking)
+    CMMapAppUber,           // Uber
+    // Transit apps (by ranking)
     CMMapAppMoovit,         // Moovit
+    CMMapAppCitymapper,     // Citymapper
+    CMMapAppTheTransitApp,  // The Transit App
     
     CMMapAppLast            // Must be always last
 };
