@@ -1,13 +1,13 @@
-Pod::Spec.new do |s|
-  s.name         = "CMMapLauncher"
-  s.version      = "1.1.0"
-  s.summary      = "CMMapLauncher is a mini-library for iOS that makes it quick and easy to show directions in various mapping applications."
-  s.homepage     = "https://github.com/shebuka/CMMapLauncher"
-  s.license      = { :type => 'MIT', :file => 'LICENSE' }
-  s.author       = 'Citymapper'
-  s.platform     = :ios
-  s.source       = { :git => "https://github.com/shebuka/CMMapLauncher.git", :tag => "1.1.0" }
-  s.source_files = 'CMMapLauncher'
-  s.framework    = 'MapKit'
-  s.requires_arc = true
+Pod::Spec.new do |spec|
+  spec.name         = "CMMapLauncher"
+  spec.version      = "2.0.0"
+  spec.summary      = "CMMapLauncher is a mini-library for iOS that makes it quick and easy to show directions in various mapping applications."
+  spec.homepage     = "https://github.com/Shebuka/CMMapLauncher"
+  spec.license      = { :type => 'MIT', :file => 'LICENSE' }
+  spec.authors      = { 'Citymapper', 'Shebuka' => 'shebuka@hotmail.com' }
+  spec.platform     = :ios
+  spec.source       = { :git => "https://github.com/shebuka/CMMapLauncher.git", :tag => "2.0.0" }
+  spec.source_files = 'CMMapLauncher.{h,m}'
+  spec.framework    = 'MapKit'
+  spec.requires_arc = true
 end
