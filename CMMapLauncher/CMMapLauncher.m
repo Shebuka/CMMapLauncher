@@ -380,9 +380,6 @@ static BOOL debugEnabled;
         urlComponents.scheme = [self urlPrefixForMapApp:mapApp];
         urlComponents.host = @"";
         
-//        if (end.name)
-//            [queryItems addObject:[NSURLQueryItem queryItemWithName:@"q" value:end.name] ];
-        
         [queryItems addObject:[NSURLQueryItem queryItemWithName:@"ll" value:[end coordinateString]] ];
         
         if (directionsMode)
