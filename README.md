@@ -53,7 +53,7 @@ CMMapPoint *mapPoint = [CMMapPoint mapPointWithName:@"Big Ben" coordinate:bigBen
 Instead of checking all the available apps yourself, you can present an actionSheet with all currently available apps by calling:
 
 ```objective-c
-[CMMapLauncher showActionSheetWithMapAppOptionsInViewController:self forPosition:mapPoint];
+[CMMapLauncher showActionSheetWithMapAppOptionsInViewController:self fromBarButtonItem:self.navigationItem.rightBarButtonItem forPosition:mapPoint];
 ```
 
 Enable debug logging to log the launch URI/parameters:
