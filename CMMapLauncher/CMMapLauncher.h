@@ -89,7 +89,7 @@ NSString *const CMDirectionsModeTransit = @"transit";
  @param controller A view controller that will present the action sheet.
  @param position The position of the desired point to show.
  */
-+ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)controller forPosition:(CMMapPoint *)position;
++ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)controller fromBarButtonItem:(UIBarButtonItem *)aBarButtonItem forPosition:(CMMapPoint *)position;
 
 /**
  Launches the specified mapping application with position

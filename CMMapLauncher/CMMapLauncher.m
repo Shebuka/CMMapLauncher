@@ -194,7 +194,7 @@ static BOOL debugEnabled;
     return [[UIApplication sharedApplication] canOpenURL:components.URL];
 }
 
-+ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)aController forPosition:(CMMapPoint *)aPosition {
++ (void)showActionSheetWithMapAppOptionsInViewController:(UIViewController *)aController fromBarButtonItem:(UIBarButtonItem *)aBarButtonItem forPosition:(CMMapPoint *)aPosition {
     
     // Create new alert controller
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
@@ -218,6 +218,8 @@ static BOOL debugEnabled;
             [alertController addAction:alertMemberInfoAction];
         }
     }
+    
+    alertController.popoverPresentationController.barButtonItem = aBarButtonItem; // necessary for iPad
     
     // Present the alert controller
     [aController presentViewController:alertController animated:YES completion:nil];
